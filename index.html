@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Burger Oila — Kassa</title>
+  <meta name="theme-color" content="#ffc21a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Burger Oila">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <style id="pageSize">@media print { @page { size: 80mm auto; margin: 3mm; } }</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M6 22c0-10 8-15 18-15s18 5 18 15z" fill="#e8962e"/>
+      <circle cx="16" cy="14" r="1.3" fill="#fff4d6"/><circle cx="24" cy="11" r="1.3" fill="#fff4d6"/><circle cx="31" cy="15" r="1.3" fill="#fff4d6"/>
+      <path d="M4 25h40l-4 4-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3z" fill="#4caf50"/>
+      <rect x="5" y="28" width="38" height="7" rx="3.5" fill="#6b3a1e"/>
+      <path d="M5 34h38v3c0 3-3 5-6 5H11c-3 0-6-2-6-5z" fill="#e8962e"/>
+    </svg>
+    <span id="brandName">Burger Oila</span>
+  </div>
+  <nav class="tabs">
+    <a href="#kassa" id="t-kassa">Kassa</a>
+    <a href="#smena" id="t-smena">Smena</a>
+    <a href="#hisobot" id="t-hisobot">Hisobot</a>
+    <a href="#menyu" id="t-menyu">Menyu</a>
+  </nav>
+  <div class="hstat">
+    <span id="shiftStat"></span>
+    <button class="themebtn" id="installBtn" type="button" hidden>Ilovani o'rnatish</button>
+    <button class="themebtn" id="themeBtn" type="button">Tungi rejim</button>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+<!-- ============ KASSA ============ -->
+<main id="v-kassa" class="view">
+  <div class="pos">
+    <section>
+      <div class="search">
+        <input id="q" type="search" placeholder="Nomi yoki kodi: masalan “burg”, “7” yoki “7*3” (Enter — qo'shish)" autocomplete="off">
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <aside class="cart">
+      <h2><span id="ordno">Buyurtma #1</span><button id="clear" type="button">Tozalash</button></h2>
+      <div class="holds" id="holds"></div>
+      <div class="warn" id="noShift">Smena ochilmagan. Savdo qilish uchun <a href="#smena">smenani oching</a>.</div>
+
+      <div class="seg" id="otype">
+        <button type="button" data-v="zal">Shu yerda</button>
+        <button type="button" data-v="olib">Olib ketish</button>
+        <button type="button" data-v="yetkaz">Yetkazish</button>
+      </div>
+
+      <div class="lines" id="lines"></div>
+
+      <div class="notebox">
+        <input id="onote" class="inp" placeholder="Izoh: masalan, piyozsiz" autocomplete="off">
+        <div class="tags" id="tags"></div>
+      </div>
+
+      <div class="row"><span>Oraliq summa</span><span id="subt">0 so'm</span></div>
+      <div class="row">
+        <label for="disc">Chegirma</label>
+        <select id="disc">
+          <option value="0">Yo'q</option><option value="5">5%</option><option value="10">10%</option>
+          <option value="15">15%</option><option value="20">20%</option>
+        </select>
+      </div>
+      <div class="total"><span>Jami</span><span id="tot">0 so'm</span></div>
+
+      <div class="seg" id="paym">
+        <button type="button" data-v="naqd">Naqd</button>
+        <button type="button" data-v="karta">Karta</button>
+        <button type="button" data-v="click">Click / Payme</button>
+      </div>
+
+      <div id="cashbox">
+        <div class="row">
+          <label for="given">Mijoz berdi</label>
+          <input id="given" inputmode="numeric" placeholder="0" class="given">
+        </div>
+        <div class="quick" id="quick"></div>
+        <div class="change" id="change"></div>
+      </div>
+
+      <button class="paybtn" id="paybtn" type="button" disabled>To'lovni tasdiqlash (F2)</button>
+      <button class="holdbtn" id="holdbtn" type="button" disabled>Kutishga qo'yish (F4)</button>
+    </aside>
+  </div>
+</main>
+
+<!-- ============ SMENA ============ -->
+<main id="v-smena" class="view">
+  <div class="page">
+
+    <!-- Smena yopiq bo'lsa -->
+    <div id="shiftClosed">
+      <h1>Smenani ochish</h1>
+      <p class="sub">Ish boshida kassadagi naqd pulni sanab, shu yerga yozing.</p>
+      <div class="box narrow">
+        <label class="fl" for="openCash">Kassadagi boshlang'ich naqd pul (so'm)</label>
+        <input class="inp money" id="openCash" inputmode="numeric" placeholder="0">
+        <button class="prim wide" id="openBtn" type="button">Smenani ochish</button>
+      </div>
+    </div>
+
+    <!-- Smena ochiq bo'lsa -->
+    <div id="shiftOpen">
+      <h1>Joriy smena</h1>
+      <p class="sub" id="shiftSub"></p>
+
+      <div class="kpis" id="shiftKpis"></div>
+
+      <div class="two">
+        <div class="box">
+          <h2>Xarajat qo'shish</h2>
+          <label class="fl" for="exAmount">Summa (so'm)</label>
+          <input class="inp money" id="exAmount" inputmode="numeric" placeholder="0">
+          <label class="fl" for="exCat">Nima uchun</label>
+          <input class="inp" id="exCat" list="exCats" placeholder="Masalan: Go'sht">
+          <datalist id="exCats"></datalist>
+          <label class="fl" for="exNote">Izoh (ixtiyoriy)</label>
+          <input class="inp" id="exNote" placeholder="Masalan: 5 kg, bozordan">
+          <label class="fl" for="exSrc">Pul qayerdan</label>
+          <select class="inp" id="exSrc">
+            <option value="kassa">Kassadan (naqd)</option>
+            <option value="boshqa">Boshqa joydan (kassaga ta'sir qilmaydi)</option>
+          </select>
+          <button class="prim wide" id="exAdd" type="button">Xarajatni qo'shish</button>
+          <span class="note" id="exMsg"></span>
+        </div>
+
+        <div class="box">
+          <h2>Smenani yopish</h2>
+          <p class="note">Kun oxirida kassadagi naqd pulni sanang va yozing. Dastur kutilgan summa bilan solishtiradi.</p>
+          <label class="fl" for="closeCash">Kassada sanalgan naqd pul (so'm)</label>
+          <input class="inp money" id="closeCash" inputmode="numeric" placeholder="0">
+          <div class="diff" id="closeDiff"></div>
+          <button class="prim wide" id="closeBtn" type="button">Smenani yopish</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Smena xarajatlari</h2>
+        <div class="scroll"><table id="exTable"></table></div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:18px">
+      <h2>Oldingi smenalar</h2>
+      <div class="scroll"><table id="shiftHist"></table></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ HISOBOT ============ -->
+<main id="v-hisobot" class="view">
+  <div class="page">
+    <h1 id="rtitle">Bugungi savdo</h1>
+    <p class="sub" id="rsub"></p>
+
+    <div class="seg rmode" id="rmode">
+      <button type="button" data-v="day">Kunlik</button>
+      <button type="button" data-v="range">Hafta / Oy / Davr</button>
+    </div>
+
+    <!-- Kunlik tanlov -->
+    <div class="bar0" id="rDayBar">
+      <label for="rday">Sana</label>
+      <input type="date" id="rday">
+      <button class="sm" type="button" data-q="today">Bugun</button>
+      <button class="sm" type="button" data-q="yesterday">Kecha</button>
+    </div>
+
+    <!-- Davr tanlov -->
+    <div class="bar0" id="rRangeBar">
+      <label for="rfrom">Dan</label>
+      <input type="date" id="rfrom">
+      <label for="rto">Gacha</label>
+      <input type="date" id="rto">
+      <button class="sm" type="button" data-q="week">Shu hafta</button>
+      <button class="sm" type="button" data-q="lastweek">O'tgan hafta</button>
+      <button class="sm" type="button" data-q="month">Shu oy</button>
+      <button class="sm" type="button" data-q="lastmonth">O'tgan oy</button>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="box" id="dailyBox" style="margin-bottom:18px">
+      <h2>Kunlar bo'yicha</h2>
+      <div class="legend"><span><i class="lg-in"></i>Tushum</span><span><i class="lg-out"></i>Xarajat</span></div>
+      <div id="daily"></div>
+    </div>
+
+    <div class="two">
+      <div class="box"><h2>To'lov turlari</h2><div id="bypay"></div></div>
+      <div class="box"><h2>Eng ko'p sotilganlar</h2><div id="top"></div></div>
+    </div>
+    <div class="box" style="margin-bottom:18px"><h2>Xarajatlar</h2><div id="rexp"></div></div>
+
+    <div class="box" id="ordersBox" style="margin-bottom:18px"><h2>Buyurtmalar</h2><div class="scroll"><table id="orders"></table></div></div>
+
+    <div class="box">
+      <h2>Chop etish va Excel</h2>
+      <p class="note">Tanlangan kun yoki davr bo'yicha. Excel fayllari .csv formatida yuklanadi, ularni Excel'da ikki marta bosib ochasiz.</p>
+      <div class="bar0">
+        <button class="sm" id="rprint" type="button">Hisobotni chop etish</button>
+        <button class="sm" id="xSales" type="button">Savdolar → Excel</button>
+        <button class="sm" id="xExp" type="button">Xarajatlar → Excel</button>
+        <button class="sm" id="xDaily" type="button">Kunlik jami → Excel</button>
+        <span class="note" id="xMsg"></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ MENYU ============ -->
+<main id="v-menyu" class="view">
+  <div class="page">
+    <h1>Menyu va narxlar</h1>
+    <p class="sub">Taom qo'shing, nomi, bo'limi va narxini yozing, keyin “Saqlash”ni bosing. “Sevimli” belgilangan taomlar kassada alohida tugmada birinchi chiqadi. Kod bo'sh qolsa, dastur o'zi raqam beradi. Tannarx — bitta taomni tayyorlash sizga necha pulga tushishi (mahsulot + qadoq).</p>
+    <div class="scroll">
+      <table class="ed">
+        <thead><tr><th class="code">Kod</th><th>Nomi</th><th>Bo'lim</th><th class="n">Narxi (so'm)</th><th class="n">Tannarx (so'm)</th><th class="fav">Sevimli</th><th></th></tr></thead>
+        <tbody id="mrows"></tbody>
+      </table>
+    </div>
+    <datalist id="catlist"></datalist>
+    <div class="bar0" style="margin-top:14px">
+      <button class="sm" id="madd" type="button">+ Taom qo'shish</button>
+      <button class="prim" id="msave" type="button">Saqlash</button>
+      <span class="note" id="mmsg"></span>
+    </div>
+
+    <div class="box" style="margin-top:28px">
+      <h2>Chek sozlamalari</h2>
+      <div class="setgrid">
+        <div>
+          <label class="fl" for="sName">Do'kon nomi</label>
+          <input class="inp" id="sName" placeholder="Burger Oila">
+          <label class="fl" for="sAddr">Manzil</label>
+          <input class="inp" id="sAddr" placeholder="Masalan: Toshkent, Chilonzor 9-kvartal">
+          <label class="fl" for="sPhone">Telefon</label>
+          <input class="inp" id="sPhone" placeholder="+998 90 123 45 67">
+          <label class="fl" for="sFoot">Chek pastidagi yozuv</label>
+          <textarea class="inp area" id="sFoot" rows="3"></textarea>
+          <label class="fl">Printer kengligi</label>
+          <div class="seg" id="sWidth">
+            <button type="button" data-v="80">80 mm</button>
+            <button type="button" data-v="58">58 mm</button>
+          </div>
+          <label class="check"><input type="checkbox" id="sAuto"> To'lovdan keyin chekni avtomatik chop etish</label>
+          <button class="prim wide" id="sSave" type="button">Sozlamalarni saqlash</button>
+          <span class="note" id="sMsg"></span>
+        </div>
+        <div>
+          <span class="fl">Chek ko'rinishi</span>
+          <div class="preview"><div class="rcpt" id="sPreview"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:18px">
+      <h2>Zaxira nusxa</h2>
+      <p class="note">Menyu, savdolar, smenalar, xarajatlar va sozlamalar shu qurilmadagi brauzerda saqlanadi. Har kuni kechqurun zaxira faylini yuklab oling.</p>
+      <p class="note" id="storeInfo"></p>
+      <div class="bar0">
+        <button class="sm" id="bexport" type="button">Zaxirani yuklab olish (.json)</button>
+        <label class="sm filebtn">Zaxiradan tiklash<input type="file" id="bimport" accept=".json" hidden></label>
+        <span class="note" id="bmsg"></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ CHEK ============ -->
+<div class="modal" id="modal">
+  <div>
+    <div class="rcpt" id="rcpt"></div>
+    <div class="mbtns">
+      <button type="button" id="rprint2">Chop etish</button>
+      <button type="button" class="go" id="rnew">Yangi buyurtma</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chop etish uchun -->
+<div id="printArea"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
